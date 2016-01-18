@@ -200,13 +200,32 @@ public class RavenClient : NSObject {
     */
     public func captureMessage(message: String, level: RavenLogLevel, additionalExtra:[String: AnyObject], additionalTags: [String: AnyObject], method:String? = __FUNCTION__, file:String? = __FILE__, line:Int = __LINE__) {
         var stacktrace : [AnyObject] = []
-        var culprit : String = ""
 
         if (method != nil && file != nil && line > 0) {
             let filename = (file! as NSString).lastPathComponent;
             let frame = ["filename" : filename, "function" : method!, "lineno" : line]
             stacktrace = [frame]
-            culprit = "\(method!) in \(filename)"
+        }
+
+        self.captureMessage(message, level: level, additionalExtra: additionalExtra, additionalTags: additionalTags, method: method, file: file, line: line, stacktrace: stacktrace)
+    }
+
+    /**
+     Capture a message
+
+     :param: message  The message to be logged
+     :param: level  log level
+     :param: additionalExtra  Additional data that will be sent with the log
+     :param: additionalTags  Additional tags that will be sent with the log
+     :param: stacktrace Stacktrace data
+     */
+    public func captureMessage(message: String, level: RavenLogLevel, additionalExtra:[String: AnyObject], additionalTags: [String: AnyObject], method:String? = __FUNCTION__, file:String? = __FILE__, line:Int = __LINE__, stacktrace: [AnyObject]) {
+
+        var culprit : String = ""
+
+        if let method = method, file = file where line > 0 {
+            let filename = (file as NSString).lastPathComponent
+            culprit = "\(method) in \(filename)"
         }
 
         let data = self.prepareDictionaryForMessage(message, level:level, additionalExtra:additionalExtra, additionalTags:additionalTags, culprit:culprit, stacktrace:stacktrace, exception:[:])
